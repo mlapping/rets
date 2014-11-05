@@ -2,9 +2,9 @@
 package rets
 
 import (
-	"fmt"
+	"errors"
 	"github.com/mlapping/rets/results"
-	"io"
+	"regexp"
 )
 
 type Capabilities struct {
@@ -16,20 +16,40 @@ type Capabilities struct {
 	Search      string
 }
 
-type RetsReturnType struct {
+func (cap *Capabilities) setFromLogin(reply *results.LoginReply) error {
+	rMetadata := regexp.MustCompile(`GetMetadata=([^\s]+)`)
+	rObject := regexp.MustCompile(`GetObject=([^\s]+)`)
+	rSearch := regexp.MustCompile(`Search=([^\s]+)`)
+	rLogout := regexp.MustCompile(`Logout=([^\s]+)`)
+
+	cap.GetObject = rObject.FindStringSubmatch(reply.Response.Text)[1]
+	cap.GetMetadata = rMetadata.FindStringSubmatch(reply.Response.Text)[1]
+	cap.Search = rSearch.FindStringSubmatch(reply.Response.Text)[1]
+	cap.Logout = rLogout.FindStringSubmatch(reply.Response.Text)[1]
+
+	return cap.Validate()
 }
 
-type RetsCapabilities struct {
-}
+func (cap *Capabilities) Validate() error {
+	errPrefix := "Server did not return valid capabilities for: "
 
-func (cap *Capabilities) setFromLogin(responseBody interface {
-	io.Reader
-	io.Closer
-}) {
-	reply := results.ConvertServerResponse(responseBody)
+	if cap.GetObject == "" {
+		return errors.New(errPrefix + "GetObject")
+	}
 
-	fmt.Println(err)
-	fmt.Println(representation)
+	if cap.GetMetadata == "" {
+		return errors.New(errPrefix + "GetMetadata")
+	}
+
+	if cap.Search == "" {
+		return errors.New(errPrefix + "Search")
+	}
+
+	if cap.Logout == "" {
+		return errors.New(errPrefix + "Logout")
+	}
+
+	return nil
 }
 
 func (cap *Capabilities) LoginUrl() string {

@@ -72,7 +72,7 @@ func (sess *Session) tryToLogin() error {
 	// The first GET will fail, but set our cookie jar
 	res, _ := sess.HttpClient.Do(req)
 
-	// The second GET will not fail
+	// The second GET will SHOULD not fail
 	req, err = sess.newRequest("GET", sess.DialInfo.LoginUrl, nil)
 	// set our digest auth
 	req = auth.SetDigestAuth(req, sess.DialInfo.UserName, sess.DialInfo.Password, res, 1)
@@ -93,27 +93,6 @@ func (sess *Session) tryToLogin() error {
 	}
 	// setup our capabilities
 	return sess.Capabilities.setFromLogin(retsReply)
-}
-
-func (sess *Session) newRequest(method string, url string, query map[string]string) (*http.Request, error) {
-	req, err := http.NewRequest(method, url, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	// set some request parameters related to RETS
-	req.Header.Add("User-Agent", "golang rets client v1.0")
-	req.Header.Add("RETS-VERSION", "RETS/1.7.2")
-
-	if sess.Authorization != "" {
-		req.Header.Add("Authorization", sess.Authorization)
-	}
-	// parse the query params
-	for key, _ := range query {
-		req.URL.Query().Add(key, query[key])
-	}
-
-	return req, nil
 }
 
 func (dial *DialInfo) validateDialInfo() error {

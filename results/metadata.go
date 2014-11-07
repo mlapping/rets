@@ -1,10 +1,6 @@
 // metadata
 package results
 
-import (
-	"time"
-)
-
 type MetadataReply struct {
 	Code     int      `xml:"ReplyCode,attr"`
 	Text     string   `xml:"ReplyText,attr"`
@@ -21,9 +17,9 @@ type Metadata struct {
 // Type=METADATA-LOOKUP_TYPE&ID=Property:20130414180426065306000000
 type MetadataLookupType struct {
 	Name     string                `xml:"Lookup,attr"`
-	Resource string                `xml:",attr"`
-	System   string                `xml:",attr`
-	Values   []MetadataLookupValue `xml:"Lookup"`
+	Resource string                `xml:"Resource,attr"`
+	System   string                `xml:"System,attr`
+	Values   []MetadataLookupValue `xml:"LookupType"`
 }
 
 type MetadataLookupValue struct {
@@ -33,8 +29,8 @@ type MetadataLookupValue struct {
 }
 
 type MetadataClassListing struct {
-	Date     time.Time       `xml:",attr"`
-	System   string          `xml:",attr"`
+	Date     string          `xml:"Date,attr"` // this eventually needs to be a datetime
+	System   string          `xml:"System,attr"`
 	Resource string          `xml:"Resource,attr"`
 	Classes  []MetadataClass `xml:"Class"`
 }
@@ -52,22 +48,22 @@ type MetadataClass struct {
 }
 
 type MetadataResourceListing struct {
-	Date      time.Time          `xml:",attr"`
-	System    string             `xml:",attr"`
+	Date      string             `xml:"Date,attr"` // TODO make this a datetime
+	System    string             `xml:"System,attr"`
 	Resources []MetadataResource `xml:"Resource"`
 }
 
 type MetadataTable struct {
-	Resource string          `xml:",attr"`
-	Class    string          `xml:",attr"`
-	Date     time.Time       `xml:",attr"`
-	System   string          `xml:",attr"`
+	Resource string          `xml:"Resource,attr"`
+	Class    string          `xml:"Class,attr"`
+	Date     string          `xml:"Date,attr"` // TODO make this a datetime
+	System   string          `xml:"System,attr"`
 	Fields   []MetadataField `xml:"Field"`
 }
 
 // Type=METADATA-RESOURCE&ID=0
 type MetadataResource struct {
-	Id                          string
+	Id                          string `xml:"ResourceID"`
 	StandardName                string
 	VisibleName                 string
 	Description                 string
@@ -100,9 +96,9 @@ type MetadataField struct {
 	LongName       string
 	DBName         string
 	ShortName      string
-	MaximumLength  int
+	MaximumLength  string // make this an int
 	DataTyp        string
-	Precision      int
+	Precision      string // make this an int
 	Searchable     bool
 	Interpretatiom string
 	Alignment      string

@@ -6,12 +6,13 @@ import (
 	"code.google.com/p/go-charset/charset"
 	"encoding/xml"
 	"errors"
-	"fmt"
+	//	"fmt"
 	"io"
 	"io/ioutil"
 	"strings"
 )
 
+// Used For Debugging
 func readerToString(r interface {
 	io.Reader
 }) string {
@@ -26,16 +27,19 @@ func stringToReader(s string) interface {
 	return strings.NewReader(s)
 }
 
+/*
+	Converts RETS XML to a struct
+*/
 func ConvertServerResponse(results io.ReadCloser, object interface{}) error {
 	defer results.Close()
 
 	// setup a decoder
 
 	// uncomment to debug
-	str := readerToString(results)
-	fmt.Println(str)
-	xmlReader := xml.NewDecoder(stringToReader(str))
-	//xmlReader := xml.NewDecoder(results)
+	//str := readerToString(results)
+	//fmt.Println(str)
+	//xmlReader := xml.NewDecoder(stringToReader(str))
+	xmlReader := xml.NewDecoder(results)
 
 	xmlReader.CharsetReader = charset.NewReader
 

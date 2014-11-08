@@ -1,9 +1,15 @@
 // search
 package results
 
-type Query string
+type SearchReply struct {
+	Code      int       `xml:"ReplyCode,attr"`
+	Text      string    `xml:"ReplyText,attr"`
+	MaxRows   string    `xml:"MAXROWS"` // make this an int
+	Delimiter Delimiter `xml:"DELIMITER"`
+	Columns   string    `xml:"COLUMNS"`
+	Data      []string  `xml:"DATA"`
+}
 
-type REData struct {
-	MaxRows             int                   `xml:"MAXROWS"`
-	ResidentialListings []ResidentialProperty `xml:"REProperties>ResidentialProperty"`
+type Delimiter struct {
+	Value string `xml:"value,attr"`
 }

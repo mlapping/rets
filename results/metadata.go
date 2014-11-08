@@ -97,10 +97,10 @@ type MetadataField struct {
 	DBName         string
 	ShortName      string
 	MaximumLength  string // make this an int
-	DataTyp        string
+	DataType       string
 	Precision      string // make this an int
 	Searchable     bool
-	Interpretatiom string
+	Interpretation string
 	Alignment      string
 	UseSeparator   string
 	EditMaskID     string

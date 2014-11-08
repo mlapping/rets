@@ -2,7 +2,9 @@
 package rets
 
 import (
+	"fmt"
 	"github.com/mlapping/rets/results"
+	"strconv"
 )
 
 type Count int
@@ -23,26 +25,33 @@ type SearchQuery struct {
 	StandardNames bool
 }
 
-// SearchType=Property&Class=A&QueryType=DMQL2&Query=%28LIST_15=%7COV61GOJ13C0%29&StandardNames=0&Limit=50
 /*
 	Run a DMQL Search query on a Resource/Class pair
+
+	SearchType=Property&Class=A&QueryType=DMQL2&Query=%28LIST_15=%7COV61GOJ13C0%29&StandardNames=0&Limit=50
+
 */
-func (sess *Session) Search(query *SearchQuery, addtlParams map[string]string) (interface{}, error) {
+func (sess *Session) Search(query *SearchQuery, addtlParams map[string]string) (*results.SearchReply, error) {
 	queryString := map[string]string{
 		"SearchType":    query.Resource,
 		"Class":         query.Class,
 		"QueryType":     "DMQL2",
 		"Query":         query.DMQL,
-		"Count":         string(query.Count),
-		"StandardNames": string(boolToInt(query.StandardNames)),
-		"Limit":         string(query.Limit),
+		"Count":         strconv.Itoa(int(query.Count)),
+		"StandardNames": strconv.Itoa(boolToInt(query.StandardNames)),
+		"Limit":         strconv.Itoa(query.Limit),
+		"Format":        "COMPACT-DECODED",
 	}
 
 	// fire off the query
-	metaReply := &results.MetadataReply{}
-	err := sess.getResults("TypeLookup", "GET", sess.Capabilities.SearchUrl(), queryString, metaReply)
+	searchReply := &results.SearchReply{}
+	err := sess.getResults("Search", "GET", sess.Capabilities.SearchUrl(), queryString, searchReply)
 
-	return metaReply, err
+	if err == nil && searchReply.Code != 0 {
+		return nil, fmt.Errorf("rets.%s: Error: %s", "Search", searchReply.Text)
+	}
+
+	return searchReply, err
 
 }
 

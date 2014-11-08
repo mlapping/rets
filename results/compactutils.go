@@ -4,27 +4,18 @@ package results
 import (
 	"encoding/hex"
 	"errors"
-	"fmt"
 	"strings"
 )
 
-func (reply *SearchReply) CompactDecoded() ([]map[string]string, error) {
-	if reply == nil {
-		return nil, fmt.Errorf("rets/CompactDecoded: Passed a nil pointer")
-	}
+var DecodeData = strings.Split
 
-	slice, err := hex.DecodeString(reply.Delimiter.Value)
-	if err != nil {
-		return nil, errors.New("Error reading Compact Decoded delimiter")
-	}
-
-	delimiter := string(slice[0])
-	keys := strings.Split(reply.Columns, delimiter)
+func (reply *SearchReply) DecodeCompactMultiColumn() ([]map[string]string, error) {
+	keys, delimiter := reply.DecodeColumns()
 
 	// iterate through each of the data elements
 	propertyData := make([]map[string]string, len(reply.Data))
 	for i, dataString := range reply.Data {
-		values := strings.Split(dataString, delimiter)
+		values := DecodeData(dataString, delimiter)
 
 		if len(keys) != len(values) {
 			return nil, errors.New("Error decoding Compact Decoded data: column count does not match values count. Is this a compliant RETS server?")
@@ -39,4 +30,17 @@ func (reply *SearchReply) CompactDecoded() ([]map[string]string, error) {
 	}
 
 	return propertyData, nil
+}
+
+func (reply *SearchReply) DecodeColumns() ([]string, string) {
+	delimiter := reply.GetDelimiter()
+	return DecodeData(reply.Columns, delimiter), delimiter
+}
+
+func (reply *SearchReply) GetDelimiter() string {
+	byteSlice, err := hex.DecodeString(reply.Delimiter.Value)
+	if err != nil {
+		return ""
+	}
+	return string(byteSlice[0])
 }

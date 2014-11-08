@@ -44,5 +44,4 @@ func (sess *Session) Object(query *ObjectQuery, addtlParams map[string]string) (
 		return multipartObjects, nil
 	}
 	return nil, fmt.Errorf("Not implemented, sorry :(")
-
 }

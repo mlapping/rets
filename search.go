@@ -43,6 +43,10 @@ func (sess *Session) Search(query *SearchQuery, addtlParams map[string]string) (
 		"Format":        "COMPACT-DECODED",
 	}
 
+	for key, value := range addtlParams {
+		queryString[key] = value
+	}
+
 	// fire off the query
 	searchReply := &results.SearchReply{}
 	err := sess.getResults("Search", "GET", sess.Capabilities.SearchUrl(), queryString, searchReply)
@@ -53,6 +57,37 @@ func (sess *Session) Search(query *SearchQuery, addtlParams map[string]string) (
 
 	return searchReply, err
 
+}
+
+// SearchType=Property&Class=A&Query=*&QueryType=DMQL2&Select=LIST_1,LIST_105&Limit=NONE&Format=COMPACT
+/*
+	Using a special feature in RETS 1.7.2, you can get a key for every record in the database regardless of your search query hard-limit
+*/
+func (sess *Session) AllKeys(resource, class string) (*results.SearchReply, error) {
+	keyField, err := sess.KeyField(resource)
+	if err != nil {
+		return nil, fmt.Errorf("rets.AllKeys: Resource %s does not have a KeyField. This feature is not available for this resource.", resource)
+	}
+
+	queryString := map[string]string{
+		"SearchType": resource,
+		"Class":      class,
+		"QueryType":  "DMQL2",
+		"Query":      "*",
+		"Limit":      "NONE",
+		"Format":     "COMPACT",
+		"Select":     keyField,
+	}
+
+	// fire off the query
+	searchReply := &results.SearchReply{Data: make([]string, 0)}
+	err = sess.getResults("Search", "GET", sess.Capabilities.SearchUrl(), queryString, searchReply)
+
+	if err == nil && searchReply.Code != 0 {
+		return nil, fmt.Errorf("rets.%s: Error: %s", "Search", searchReply.Text)
+	}
+
+	return searchReply, err
 }
 
 func boolToInt(b bool) int {

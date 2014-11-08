@@ -3,7 +3,6 @@ package results
 
 import (
 	"bytes"
-	"code.google.com/p/go-charset/charset"
 	"encoding/xml"
 	"errors"
 	//	"fmt"
@@ -27,6 +26,16 @@ func stringToReader(s string) interface {
 	return strings.NewReader(s)
 }
 
+func asciiToUtf(charset string, input io.Reader) (io.Reader, error) {
+	switch charset {
+	case "US-ASCII", "UTF8":
+		return input, nil
+	default:
+		return nil, errors.New("Cant handle that characterset")
+	}
+
+}
+
 /*
 	Converts RETS XML to a struct
 */
@@ -41,7 +50,7 @@ func ConvertServerResponse(results io.ReadCloser, object interface{}) error {
 	//xmlReader := xml.NewDecoder(stringToReader(str))
 	xmlReader := xml.NewDecoder(results)
 
-	xmlReader.CharsetReader = charset.NewReader
+	xmlReader.CharsetReader = asciiToUtf //charset.NewReader
 
 	err := xmlReader.Decode(object)
 	if err != nil {

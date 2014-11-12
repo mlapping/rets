@@ -87,7 +87,11 @@ func (sess *Session) AllKeys(resource, class string) (*results.SearchReply, erro
 		return nil, fmt.Errorf("rets.%s: Error: %s", "Search", searchReply.Text)
 	}
 
-	delimiter := searchReply.GetDelimiter()
+	delimiter, err := searchReply.GetDelimiter()
+	if err != nil {
+		return nil, err
+	}
+
 	for i, value := range searchReply.Data {
 		searchReply.Data[i] = results.DecodeData(value, delimiter)[1]
 	}
